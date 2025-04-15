@@ -1,0 +1,539 @@
+⚠️ Current Issues (Based on Review)
+Hardcoded Data
+Most of the client values (weight, macros, compliance, etc.) are constants in useState rather than being dynamically loaded or editable.
+🔧 Fix: Create editable fields and persist them.
+
+No Data Entry Flow
+There’s no way to:
+
+Enter new daily check-ins
+
+Modify or confirm completed training/cardio
+
+Adjust macros based on phase/progress
+🔧 Fix: Build editable weekly/day input panels with backend or local persistence.
+
+Weekly Planner Is Static
+The weekly planner just displays hardcoded entries.
+🔧 Fix: Allow input via dropdowns, checkbox toggles, or mini-forms per day.
+
+No Timeline/Date Context
+Excel had per-date rows (weekly/daily tracking). The app lacks actual calendar linkage.
+🔧 Fix: Implement date-tracked weekly views with ability to archive/view past weeks.
+
+Compliance Not Editable
+The compliance percentages are fixed; user cannot input or track their actual adherence rates.
+🔧 Fix: Add input logic and summary auto-calculation from submetrics (e.g., training + cardio).
+
+No Client-Editable Goals or Metrics
+Goal weight, target steps, macros, mood logs, etc., are fixed in code.
+🔧 Fix: Add client/coach-editable parameters with save functionality.
+
+Data Does Not Persist
+No backend or localStorage support for saving check-in forms, progress, or goals.
+🔧 Fix: Use localStorage or Firebase (or Supabase) for data persistence and historical views.
+
+Missing Breakdown Tabs from Excel
+Excel included sections like:
+
+PED log / supplement log
+
+Weekly averages
+
+Psychological feedback fields
+
+Daily and weekly energy levels, hunger, sleep
+🔧 Fix: Integrate tabs or accordion panels with rating selectors.
+
+✅ What to Build — Step-by-Step
+🗂️ 1. Refactor All Static Data into Editable Inputs
+Convert all client constants (weight, start date, goal weight, compliance rates) to controlled state via forms.
+
+Each section should be editable inline or via modal.
+
+Add “Save” and “Reset” buttons to persist or revert.
+
+📅 2. Weekly View Builder
+Replace hardcoded weekly planner with:
+
+A form to dynamically build each week's structure.
+
+Inputs per day: training, macros, cardio target, cardio actual, steps, mood, sleep.
+
+Enable duplication from previous week or template use.
+
+📝 3. Dynamic Check-In Entries
+Build a check-in form that allows:
+
+Tracking training/cardio compliance
+
+Mood, hunger, digestion, libido, etc.
+
+Weight/waist/hip/chest updates
+
+Store these entries and reflect them in weekly/daily summaries.
+
+📊 4. Visual Trends
+Use Recharts or Victory to show progress over time:
+
+Weight trends
+
+Sleep duration
+
+Cardio minutes/week
+
+Mood/hunger ratings
+
+🧠 5. Coach/Admin Panel
+Allow coach to configure:
+
+Target macros (training/rest days)
+
+Daily step/cardio goals
+
+Check-in deadlines
+
+Store preset protocols that can be applied to new weeks.
+
+🔄 6. Integrate Supplement & PED Library
+Extract from Excel and integrate with dropdowns:
+
+Supplement dose, timing, start date
+
+Cycle logs with duration, status
+
+Option to mark as "on-cycle," “off,” “tapering,” etc.
+
+📆 7. Week Navigation System
+Weekly dashboard view with “Previous Week” / “Next Week” buttons
+
+Auto-snapshot on week end (save and lock data)
+
+Past weeks should be viewable but not editable (unless admin)
+
+💾 8. Data Persistence Strategy
+Options:
+
+LocalStorage (for now) with JSON.stringify state
+
+Firebase (preferred)
+
+Structure by user → week number/date → metrics
+
+Make backend modular to allow future export to CSV or spreadsheet
+
+🏗️ System Architecture Requests
+Please provide:
+
+Suggested modular folder structure for this enhancement
+
+Components that should be extracted/refactored (i.e., WeeklyEditor, DailyCard, CheckInForm)
+
+State management method: useContext or Zustand/redux
+
+Persistent layer recommendation: localStorage, IndexedDB, Supabase, or Firebase
+
+
+🔍 Sheet-to-App Mapping Breakdown (What Your Excel Does)
+From the Excel file (Meshal Alawein.xlsx), these were the functional flows:
+
+📅 Weekly Planning (Sheet Logic)
+
+Day	Training	Cardio	Steps	Macros/Meals	Sleep	Mood	Notes
+Monday	Push Day A	40 min	10k	2300 kcal	7 hrs	😐	-
+Tuesday	Cardio + Abs	60 min	12k	2200 kcal	6 hrs	😴	Low energy
+...	...	...	...	...	...	...	...
+→ Data was entered daily, then summarized weekly: compliance %, check-in scores, progress.
+
+🧠 Mind & Recovery Log
+Mood (1–10)
+
+Libido
+
+Digestion
+
+Soreness
+
+Sleep Quality
+
+Logged daily in Excel; visualized weekly with flags for red zones.
+
+📦 PED / Supplement Tracking
+
+Compound	Dose	Time	Duration	Notes
+Test E	150mg	Mon/Thu	16 wks	Cruise
+Clenbuterol	40mcg	AM	2 wks on	Cycle 1
+🧮 Weekly Calculations (in Excel)
+% Compliance = Days hit / Total Days
+
+TDEE = Weight × Multiplier (adjusted weekly)
+
+Protein Target = Bodyweight × selected range
+
+Auto-calculated progress (delta weight, delta waist)
+
+❌ Issues in Current App
+
+Module	Issue
+WeeklyCompliance.tsx	Hardcoded complianceData (not calculated, not editable)
+ClientOverview.tsx	Displays static data (e.g., fixed weight/goal)
+NutritionOverview.tsx	No actual food/macros tracking, just displays fixed info
+No PED/supplement logs	Not interactive, not phase-aware
+No check-in logging	Missing dynamic daily log or weekly survey
+No calendar logic	Cannot see week-to-week data or past logs
+✅ Flow Diagram of Ideal System
+plaintext
+Copy
+Edit
+             ┌──────────────┐
+             │ Dashboard UI │
+             └─────┬────────┘
+                   │
+        ┌──────────▼────────────┐
+        │ Weekly Planner Module │◄────────────┐
+        └────┬────┬────┬────────┘             │
+             │    │    │                      │
+        ┌────▼┐┌──▼──┐ └─┐              ┌─────▼─────┐
+        │Day 1││Day 2│...│              │ PED Log   │
+        └─────┘└─────┘   │              │ Supplement │
+                         │              │ Protocol   │
+              ┌──────────▼─────┐        └────────────┘
+              │ Check-in Input │ (Mood, weight, macros, sleep)
+              └─────┬──────────┘
+                    │
+             ┌──────▼────────┐
+             │ Auto Calc     │──► % compliance, weight Δ, avg sleep
+             │ Weekly Summary│
+             └───────────────┘
+💡 Updated Prompt for Bolt AI (Expanded + Flow-Aware)
+🧠 Save this to your doc: it updates your Coaching Dashboard Prompt to include flow validation and architecture clarity.
+
+🧾 “New Bolt Prompt” with Flow Awareness
+Hi Bolt.ai,
+
+The dashboard we previously developed is a great start, but it lacks interactive data flow. I’ve included a workbook I originally built in Excel (Meshal Alawein.xlsx) which demonstrates how the data is tracked weekly/daily. Here's the upgraded prompt based on that logic.
+
+🔁 Core Problems to Fix
+All dashboard data is hardcoded (useState in WeeklyCompliance.tsx, ClientOverview.tsx, etc.)
+
+There’s no form-based data entry for:
+
+Daily tracking (mood, weight, sleep)
+
+Weekly metrics (compliance, check-ins)
+
+Supplement/PED schedules
+
+No persistent weekly state (each week resets)
+
+No week navigation or historical comparison
+
+No feedback/journaling logic (like in Excel)
+
+✅ What I Need (Feature-by-Feature)
+📅 Weekly/Daily Tracker
+Interactive weekly planner form:
+
+For each day, input: training done, cardio minutes, macros hit, mood, digestion, sleep
+
+Should use cards/tabs per day
+
+Weekly summary auto-calculates:
+
+Compliance % (days where targets were met)
+
+Weight change
+
+Avg sleep, avg mood
+
+📥 Dynamic Check-in
+End-of-week form with:
+
+Self-assessment: stress, hunger, digestion, soreness, libido
+
+Text feedback: wins, struggles, questions
+
+Attached visual progress (weight graph, waist measurements)
+
+💉 PED & Supplement Protocols
+Editable tables for:
+
+Compound name, dose, timing, frequency
+
+Add/remove rows dynamically
+
+Tag with phase (blast/cruise/cycle)
+
+Weekly toggle: “Currently On” vs “Resting”
+
+📈 Visualization
+Recharts/Victory line graphs:
+
+Weight trend
+
+Mood trend
+
+Compliance over time
+
+Graph toggles for weekly vs monthly vs custom
+
+🗃 Data Architecture
+Store check-ins per week object:
+
+ts
+Copy
+Edit
+interface WeekData {
+  dateRange: string;
+  checkIns: DailyCheckIn[];
+  weeklySummary: WeeklyStats;
+  supplements: SupplementEntry[];
+  PEDs: PEDCycleEntry[];
+}
+🧠 Persistence & Scaling
+Store WeekData[] locally or in Firebase
+
+Ability to export entire log as CSV
+
+Add authentication to protect sensitive data
+
+
+
+🛠️ Full Redesign Prompt – Coaching Tracker Upgrade
+
+🔍 Excel → App Flow Mapping
+
+My Excel workbook had the following functional blocks:
+
+📅 Weekly Planning
+
+Per-day: training, cardio, steps, macros, sleep, mood, notes
+
+Weekly summaries: compliance %, weight/mood/sleep averages, macros hit
+
+🧠 Mind & Recovery Logs
+
+Daily mood, digestion, libido, soreness, energy
+
+Logged daily, visualized weekly
+
+💉 PED / Supplement Tracking
+
+Compound name, dose, time, duration, notes
+
+Phase: blast/cruise/trt/off-cycle
+
+🧮 Calculations
+
+Compliance %, weight delta, protein target, adjusted TDEE
+
+❌ Issues in Current App
+
+Module
+
+Issue
+
+WeeklyCompliance.tsx
+
+Hardcoded data, not user-editable
+
+ClientOverview.tsx
+
+Static values for weight/goals
+
+NutritionOverview.tsx
+
+Lacks macro tracking
+
+Missing
+
+PED/supplement logs, check-in, journaling, weekly archive
+
+✅ What to Build
+
+1. 📥 Editable Weekly Planner
+
+Daily card input:
+
+Training (checkbox/dropdown), Cardio min, Steps, Macros
+
+Mood, Digestion, Sleep Hours, Notes
+
+Weekly auto-summary of above
+
+2. 📆 Week Navigation
+
+Calendar/week slider or previous/next week buttons
+
+Save button (snapshot), Archive viewer (read-only)
+
+3. 🧠 Dynamic Check-in Form
+
+Weekly self-review:
+
+Hunger, Digestion, Libido, Sleep Quality, Stress, Motivation
+
+Textboxes: Wins, Struggles, Plan
+
+4. 💉 PED & Supplement Manager
+
+Dynamic table:
+
+Compound, Dose, Time, Frequency, Duration, Tags
+
+Add/remove rows
+
+Weekly toggle: On/Off/Cruise
+
+5. 📊 Progress Graphs
+
+Recharts/Victory:
+
+Weight trend, Mood trend, Sleep avg, Compliance history
+
+Graph toggles: 7d, 30d, custom
+
+🧱 Architecture
+
+Folder Structure
+
+/components/
+  WeeklyEditor.tsx
+  DailyCard.tsx
+  CheckInForm.tsx
+  PEDManager.tsx
+  SupplementTracker.tsx
+  GraphDashboard.tsx
+/store/
+  useWeekData.ts (Zustand)
+/lib/
+  firebase.ts (if used)
+
+TypeScript Interfaces
+
+interface DailyCheckIn {
+  date: string;
+  training: boolean;
+  cardioMin: number;
+  steps: number;
+  macrosHit: boolean;
+  mood: number;
+  digestion: number;
+  sleepHours: number;
+  notes?: string;
+}
+
+interface WeeklyStats {
+  compliance: number;
+  avgMood: number;
+  weightDelta: number;
+  avgSleep: number;
+}
+
+interface SupplementEntry {
+  name: string;
+  dose: string;
+  time: string;
+  frequency: string;
+  duration: string;
+  phaseTag: 'on' | 'cruise' | 'off';
+}
+
+interface PEDCycleEntry extends SupplementEntry {}
+
+interface WeekData {
+  dateRange: string;
+  checkIns: DailyCheckIn[];
+  weeklySummary: WeeklyStats;
+  supplements: SupplementEntry[];
+  PEDs: PEDCycleEntry[];
+  reflections: {
+    wins: string;
+    struggles: string;
+    focus: string;
+  };
+}
+
+📦 JSON Schema (abbreviated)
+
+{
+  "dateRange": "2025-W17",
+  "checkIns": [
+    {
+      "date": "2025-04-14",
+      "training": true,
+      "cardioMin": 40,
+      "steps": 9500,
+      "macrosHit": true,
+      "mood": 7,
+      "digestion": 8,
+      "sleepHours": 7,
+      "notes": "solid workout"
+    }
+  ],
+  "weeklySummary": {
+    "compliance": 86,
+    "avgMood": 7.3,
+    "weightDelta": -0.4,
+    "avgSleep": 6.9
+  },
+  "supplements": [
+    { "name": "Creatine", "dose": "5g", "time": "AM", "frequency": "Daily", "duration": "8wks", "phaseTag": "on" }
+  ],
+  "PEDs": [
+    { "name": "Test E", "dose": "150mg", "time": "Mon/Thu", "frequency": "2x/week", "duration": "16wks", "phaseTag": "cruise" }
+  ],
+  "reflections": {
+    "wins": "Stayed on track.",
+    "struggles": "Sleep was short.",
+    "focus": "Recovery"
+  }
+}
+
+🧪 Working Component Prototype (Weekly Planner)
+
+// WeeklyEditor.tsx
+import React, { useState } from 'react';
+import { format } from 'date-fns';
+
+export default function WeeklyEditor() {
+  const [weekData, setWeekData] = useState<WeekData>({
+    dateRange: '2025-W17',
+    checkIns: Array(7).fill(null).map((_, i) => ({
+      date: format(new Date(2025, 3, 14 + i), 'yyyy-MM-dd'),
+      training: false,
+      cardioMin: 0,
+      steps: 0,
+      macrosHit: false,
+      mood: 5,
+      digestion: 5,
+      sleepHours: 6,
+    })),
+    weeklySummary: { compliance: 0, avgMood: 0, weightDelta: 0, avgSleep: 0 },
+    supplements: [],
+    PEDs: [],
+    reflections: { wins: '', struggles: '', focus: '' }
+  });
+
+  return (
+    <div className="p-4 space-y-4">
+      {weekData.checkIns.map((day, i) => (
+        <div key={day.date} className="p-3 bg-white rounded shadow">
+          <h3 className="font-semibold">{day.date}</h3>
+          <label>
+            <input type="checkbox" checked={day.training} onChange={(e) => {
+              const updated = [...weekData.checkIns];
+              updated[i].training = e.target.checked;
+              setWeekData({ ...weekData, checkIns: updated });
+            }} /> Training Done
+          </label>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+GitHub Repo: https://github.com/alaweimm/coaching-app-claude Excel Sheet: Meshal Alawein.xlsx
+
+Let me know if you'd like this modularized into Bolt-specific design blocks or deployed into your stack!
+
