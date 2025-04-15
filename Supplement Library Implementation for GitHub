@@ -1,0 +1,717 @@
+/**
+ * @file supplement-library.js
+ * @description Comprehensive supplements system implementation
+ * based on data from provided coaching documents
+ */
+
+/**
+ * Define supplement categories for organization and filtering
+ * @type {string[]}
+ */
+const SUPPLEMENT_CATEGORIES = [
+  'general_health',
+  'hormonal_support',
+  'liver_support',
+  'cardiovascular',
+  'anti_inflammatory',
+  'joint_health',
+  'recovery',
+  'sleep',
+  'cognitive',
+  'fat_loss',
+  'glucose_control',
+  'sexual_health',
+  'immune_support',
+  'gut_health',
+  'performance'
+];
+
+/**
+ * Supplement database containing structured data for each supplement
+ * with dosing information, benefits, and scientific backing
+ */
+const SUPPLEMENTS_DATABASE = {
+  // General Health Supplements
+  vitaminD3: {
+    id: 'vitamin-d3',
+    name: 'Vitamin D3',
+    categories: ['general_health', 'hormonal_support', 'immune_support'],
+    dosage: {
+      standard: {
+        amount: 5000,
+        unit: 'IU',
+        frequency: 'daily',
+        timing: 'with food'
+      },
+      maximum: {
+        amount: 10000,
+        unit: 'IU',
+        frequency: 'daily'
+      }
+    },
+    benefits: [
+      'Improves energy levels',
+      'Combats fatigue',
+      'Boosts mood',
+      'Supports bone health',
+      'Enhances testosterone production',
+      'Strengthens immune function'
+    ],
+    notes: 'Take with vitamin K2 for synergistic effects',
+    supportedByResearch: true,
+    cautions: 'High doses may require monitoring calcium levels',
+    interactions: ['May increase effectiveness of testosterone']
+  },
+  
+  vitaminK2: {
+    id: 'vitamin-k2',
+    name: 'Vitamin K2',
+    categories: ['general_health', 'cardiovascular'],
+    dosage: {
+      standard: {
+        amount: 100,
+        unit: 'mcg',
+        frequency: 'daily',
+        timing: 'with vitamin D'
+      },
+      notes: '200mcg per 5000IU vitamin D recommended'
+    },
+    benefits: [
+      'Bone health',
+      'Cardiovascular support',
+      'Helps direct calcium to appropriate tissues',
+      'May reduce arterial calcification'
+    ],
+    forms: [
+      {
+        name: 'MK-4',
+        notes: 'Shorter-acting form'
+      },
+      {
+        name: 'MK-7',
+        notes: 'Longer-acting form'
+      }
+    ],
+    supportedByResearch: true
+  },
+  
+  zinc: {
+    id: 'zinc',
+    name: 'Zinc',
+    categories: ['general_health', 'hormonal_support', 'immune_support'],
+    dosage: {
+      standard: {
+        amount: 30,
+        unit: 'mg',
+        frequency: 'daily',
+        timing: 'with food'
+      },
+      maximum: {
+        amount: 50,
+        unit: 'mg',
+        frequency: 'daily'
+      }
+    },
+    benefits: [
+      'Supports testosterone production',
+      'Strengthens hair/nails',
+      'Improves thyroid function',
+      'Enhances immune response'
+    ],
+    preferredForms: ['zinc picolinate', 'zinc citrate'],
+    notes: 'Long-term high-dose use may require copper supplementation',
+    supportedByResearch: true
+  },
+  
+  magnesium: {
+    id: 'magnesium',
+    name: 'Magnesium',
+    categories: ['general_health', 'sleep', 'recovery', 'glucose_control'],
+    dosage: {
+      standard: {
+        amount: 350,
+        unit: 'mg',
+        frequency: 'daily',
+        timing: 'pre-bed'
+      },
+      maximum: {
+        amount: 1000,
+        unit: 'mg',
+        frequency: 'daily'
+      }
+    },
+    benefits: [
+      'Muscle relaxation',
+      'Improved sleep quality',
+      'Supports energy production',
+      'Reduces tiredness',
+      'Maintains normal muscle function',
+      'Bone and teeth health'
+    ],
+    preferredForms: ['magnesium glycinate', 'magnesium threonate'],
+    cautions: 'High doses may cause loose stools',
+    supportedByResearch: true
+  },
+  
+  // Liver Support & Detoxification
+  tudca: {
+    id: 'tudca',
+    name: 'TUDCA (Tauroursodeoxycholic Acid)',
+    categories: ['liver_support'],
+    dosage: {
+      standard: {
+        amount: 500,
+        unit: 'mg',
+        frequency: 'daily',
+        timing: 'divided doses'
+      },
+      withOrals: {
+        amount: 500,
+        unit: 'mg',
+        frequency: '3x daily'
+      }
+    },
+    benefits: [
+      'Promotes healthy liver function',
+      'Protects liver cells',
+      'Enhances bile flow',
+      'May reverse liver damage'
+    ],
+    importanceWithPEDs: 'Critical with oral AAS and hepatotoxic compounds',
+    supportedByResearch: true,
+    notes: 'More effective than milk thistle for serious liver support'
+  },
+  
+  nac: {
+    id: 'nac',
+    name: 'N-Acetyl Cysteine (NAC)',
+    categories: ['liver_support', 'anti_inflammatory', 'immune_support'],
+    dosage: {
+      standard: {
+        amount: 1000,
+        unit: 'mg',
+        frequency: 'daily',
+        timing: 'divided doses'
+      },
+      withOrals: {
+        amount: 1000,
+        unit: 'mg',
+        frequency: '3x daily'
+      }
+    },
+    benefits: [
+      'Boosts glutathione production',
+      'Supports liver detoxification',
+      'Improves respiratory health',
+      'Acts as mucolytic',
+      'Antioxidant properties'
+    ],
+    supportedByResearch: true,
+    notes: 'Core supplement for liver protection during AAS use'
+  },
+  
+  // More supplements would be defined here...
+};
+
+/**
+ * Predefined stacks of supplements for specific purposes
+ */
+const SUPPLEMENT_STACKS = {
+  liverProtection: {
+    name: 'Liver Protection Stack',
+    description: 'Essential for oral steroid users or heavy cycles',
+    core: ['tudca', 'nac'],
+    additional: ['milk-thistle', 'r-lipoic-acid'],
+    dosing: 'Take with each oral dose or 3x daily',
+    notes: 'TUDCA is the most critical component'
+  },
+  
+  lipidSupport: {
+    name: 'Lipid Support Stack',
+    description: 'For maintaining healthy cholesterol levels',
+    core: ['citrus-bergamot', 'fish-oil'],
+    additional: ['red-yeast-rice', 'niacin'],
+    notes: 'Especially important with DHT derivatives and oral compounds'
+  },
+  
+  glucoseManagement: {
+    name: 'Glucose Management Stack',
+    description: 'For insulin sensitivity and blood sugar control',
+    core: ['berberine'],
+    additional: ['chromium', 'cinnamon', 'r-lipoic-acid', 'magnesium'],
+    notes: 'Important with HGH or compounds that reduce insulin sensitivity'
+  },
+  
+  antiInflammatory: {
+    name: 'Anti-Inflammatory Stack',
+    description: 'Hydrophilic anti-inflammatory stack from document',
+    components: [
+      {
+        supplement: 'nac',
+        dosage: '1g 3x daily'
+      },
+      {
+        supplement: 'r-lipoic-acid',
+        dosage: '300-600mg 3x daily'
+      },
+      {
+        supplement: 'fish-oil',
+        dosage: '3-6g 3x daily'
+      },
+      {
+        supplement: 'tudca',
+        dosage: '500mg 3x daily'
+      },
+      {
+        supplement: 'vitamin-c',
+        dosage: '1g 3x daily'
+      },
+      {
+        supplement: 'butyric-acid',
+        dosage: '1.5g 3x daily'
+      }
+    ],
+    timing: 'Take with oral AAS administration',
+    notes: 'Comprehensive protection during cycles'
+  },
+  
+  // More stacks would be defined here...
+};
+
+/**
+ * Class to manage supplement protocols for clients
+ */
+class SupplementProtocolManager {
+  constructor() {
+    this.supplementsDatabase = SUPPLEMENTS_DATABASE;
+    this.supplementStacks = SUPPLEMENT_STACKS;
+  }
+  
+  /**
+   * Create a personalized supplement protocol based on client needs
+   * @param {Object} clientData - Client profile information
+   * @param {Array} goals - Array of client goals (e.g., 'muscle_gain', 'fat_loss')
+   * @param {Array} healthIssues - Array of health concerns (e.g., 'liver_health', 'cholesterol')
+   * @param {Array} currentPEDs - Array of PEDs the client is using
+   * @returns {Object} Personalized supplement protocol
+   */
+  createProtocol(clientData, goals = [], healthIssues = [], currentPEDs = []) {
+    const protocol = {
+      dailySupplements: [],
+      workoutSupplements: [],
+      cycleSupportSupplements: [],
+      situationalSupplements: []
+    };
+    
+    // Add foundational supplements everyone should take
+    this.addFoundationSupplements(protocol);
+    
+    // Add goal-specific supplements
+    goals.forEach(goal => {
+      this.addGoalSpecificSupplements(protocol, goal);
+    });
+    
+    // Add health-issue specific supplements
+    healthIssues.forEach(issue => {
+      this.addHealthIssueSupplements(protocol, issue);
+    });
+    
+    // Add PED-specific support supplements
+    if (currentPEDs.length > 0) {
+      this.addPEDSupportSupplements(protocol, currentPEDs);
+    }
+    
+    return protocol;
+  }
+  
+  /**
+   * Add foundation supplements that all clients should take
+   * @param {Object} protocol - The supplement protocol to modify
+   */
+  addFoundationSupplements(protocol) {
+    protocol.dailySupplements.push(
+      {
+        supplement: this.supplementsDatabase.vitaminD3,
+        dosage: {
+          amount: 5000,
+          unit: 'IU',
+          timing: 'with food'
+        },
+        priority: 'high'
+      },
+      {
+        supplement: this.supplementsDatabase.vitaminK2,
+        dosage: {
+          amount: 100,
+          unit: 'mcg',
+          timing: 'with vitamin D'
+        },
+        priority: 'high'
+      },
+      {
+        supplement: this.supplementsDatabase.zinc,
+        dosage: {
+          amount: 30,
+          unit: 'mg',
+          timing: 'with food'
+        },
+        priority: 'high'
+      },
+      {
+        supplement: this.supplementsDatabase.magnesium,
+        dosage: {
+          amount: 500,
+          unit: 'mg',
+          timing: 'pre-bed'
+        },
+        priority: 'high'
+      },
+      {
+        supplement: this.supplementsDatabase.fishOil,
+        dosage: {
+          amount: 3,
+          unit: 'g',
+          timing: 'with food'
+        },
+        priority: 'high'
+      }
+    );
+  }
+  
+  /**
+   * Add supplements specific to client goals
+   * @param {Object} protocol - The supplement protocol to modify
+   * @param {string} goal - The client goal
+   */
+  addGoalSpecificSupplements(protocol, goal) {
+    switch(goal) {
+      case 'muscle_gain':
+        protocol.workoutSupplements.push(
+          {
+            supplement: this.supplementsDatabase.creatine,
+            dosage: {
+              amount: 5,
+              unit: 'g',
+              timing: 'any time'
+            }
+          }
+        );
+        break;
+        
+      case 'fat_loss':
+        protocol.workoutSupplements.push(
+          {
+            supplement: this.supplementsDatabase.lCarnitine,
+            dosage: {
+              amount: 2,
+              unit: 'g',
+              timing: 'pre-workout'
+            }
+          }
+        );
+        break;
+        
+      case 'performance':
+        protocol.workoutSupplements.push(
+          {
+            supplement: this.supplementsDatabase.creatine,
+            dosage: {
+              amount: 5,
+              unit: 'g',
+              timing: 'any time'
+            }
+          },
+          {
+            supplement: this.supplementsDatabase.taurine,
+            dosage: {
+              amount: 4,
+              unit: 'g',
+              timing: 'pre-workout'
+            }
+          }
+        );
+        break;
+        
+      case 'general_health':
+        protocol.dailySupplements.push(
+          {
+            supplement: this.supplementsDatabase.coq10,
+            dosage: {
+              amount: 100,
+              unit: 'mg',
+              timing: 'with food'
+            }
+          }
+        );
+        break;
+    }
+  }
+  
+  /**
+   * Add supplements specific to client health issues
+   * @param {Object} protocol - The supplement protocol to modify
+   * @param {string} issue - The health issue
+   */
+  addHealthIssueSupplements(protocol, issue) {
+    switch(issue) {
+      case 'liver_health':
+        protocol.dailySupplements.push(
+          {
+            supplement: this.supplementsDatabase.nac,
+            dosage: {
+              amount: 1000,
+              unit: 'mg',
+              timing: 'divided doses'
+            },
+            priority: 'high'
+          }
+        );
+        break;
+        
+      case 'cholesterol':
+        protocol.dailySupplements.push(
+          {
+            supplement: this.supplementsDatabase.citrusBergamot,
+            dosage: {
+              amount: 1300,
+              unit: 'mg',
+              timing: 'divided doses'
+            },
+            priority: 'high'
+          }
+        );
+        break;
+        
+      case 'blood_pressure':
+        // Usually pharmaceutical intervention recommended
+        break;
+        
+      case 'insulin_sensitivity':
+        protocol.dailySupplements.push(
+          {
+            supplement: this.supplementsDatabase.berberine,
+            dosage: {
+              amount: 500,
+              unit: 'mg',
+              timing: 'with meals',
+              frequency: '3x daily'
+            },
+            priority: 'high'
+          }
+        );
+        break;
+        
+      case 'joint_pain':
+        protocol.dailySupplements.push(
+          {
+            supplement: this.supplementsDatabase.curcumin,
+            dosage: {
+              amount: 500,
+              unit: 'mg',
+              timing: 'divided doses',
+              frequency: '2x daily'
+            }
+          }
+        );
+        break;
+        
+      case 'sleep_issues':
+        protocol.dailySupplements.push(
+          {
+            supplement: this.supplementsDatabase.melatonin,
+            dosage: {
+              amount: 5,
+              unit: 'mg',
+              timing: '30 min before bed'
+            }
+          }
+        );
+        break;
+    }
+  }
+  
+  /**
+   * Add supplements specific to PEDs in use
+   * @param {Object} protocol - The supplement protocol to modify
+   * @param {Array} peds - The PEDs currently being used
+   */
+  addPEDSupportSupplements(protocol, peds) {
+    let hasOralAAS = false;
+    let has19Nor = false;
+    let hasStrongDHT = false;
+    
+    // Check for specific types of compounds
+    peds.forEach(ped => {
+      if (ped.adminRoute === 'oral' && ped.category === 'aas') {
+        hasOralAAS = true;
+      }
+      if (ped.category === 'aas-19-nor') {
+        has19Nor = true;
+      }
+      if (ped.category === 'aas-dht' && ped.potency === 'high') {
+        hasStrongDHT = true;
+      }
+    });
+    
+    // Add liver support if using oral AAS
+    if (hasOralAAS) {
+      // Get the liver protection stack
+      const liverStack = this.supplementStacks.liverProtection;
+      
+      protocol.cycleSupportSupplements.push(
+        {
+          supplement: this.supplementsDatabase.tudca,
+          dosage: {
+            amount: 500,
+            unit: 'mg',
+            frequency: '3x daily'
+          },
+          priority: 'essential'
+        },
+        {
+          supplement: this.supplementsDatabase.nac,
+          dosage: {
+            amount: 1000,
+            unit: 'mg',
+            frequency: '3x daily'
+          },
+          priority: 'essential'
+        }
+      );
+    }
+    
+    // Add lipid support for all AAS
+    protocol.cycleSupportSupplements.push(
+      {
+        supplement: this.supplementsDatabase.citrusBergamot,
+        dosage: {
+          amount: 1300,
+          unit: 'mg',
+          frequency: 'daily divided'
+        },
+        priority: 'high'
+      },
+      {
+        supplement: this.supplementsDatabase.fishOil,
+        dosage: {
+          amount: 6,
+          unit: 'g',
+          frequency: 'daily divided'
+        },
+        priority: 'high'
+      }
+    );
+    
+    // Add the full anti-inflammatory stack for comprehensive support
+    if (hasOralAAS || hasStrongDHT) {
+      protocol.cycleSupportSupplements.push(
+        {
+          stack: this.supplementStacks.antiInflammatory,
+          priority: 'high',
+          notes: 'Take with each oral dose or spread throughout day'
+        }
+      );
+    }
+  }
+  
+  /**
+   * Generate a daily timing schedule for all supplements
+   * @param {Object} protocol - The supplement protocol
+   * @param {Object} clientSchedule - Client's daily schedule
+   * @returns {Object} Timing schedule for supplements
+   */
+  generateTimingSchedule(protocol, clientSchedule) {
+    const timingSchedule = {
+      morningWithFood: [],
+      preworkout: [],
+      postworkout: [],
+      eveningWithFood: [],
+      beforeBed: []
+    };
+    
+    // Sort all supplements into timing buckets
+    [...protocol.dailySupplements, ...protocol.cycleSupportSupplements].forEach(item => {
+      const supplement = item.supplement;
+      const dosage = item.dosage;
+      
+      // Create schedule entry
+      const entry = {
+        name: supplement.name,
+        amount: `${dosage.amount}${dosage.unit}`,
+        notes: item.notes || ''
+      };
+      
+      // Assign to correct timing
+      if (dosage.timing === 'pre-bed' || supplement.id === 'melatonin') {
+        timingSchedule.beforeBed.push(entry);
+      } else if (dosage.timing === 'pre-workout') {
+        timingSchedule.preworkout.push(entry);
+      } else if (dosage.timing === 'post-workout') {
+        timingSchedule.postworkout.push(entry);
+      } else if (dosage.timing === 'with food' && dosage.frequency !== '3x daily') {
+        // Split between morning and evening if just "with food"
+        timingSchedule.morningWithFood.push(entry);
+        
+        // Add a copy to evening as well
+        timingSchedule.eveningWithFood.push({...entry});
+      } else if (dosage.frequency === '3x daily' || dosage.frequency === 'divided doses') {
+        // Add to multiple timings for divided doses
+        const dividedEntry = {
+          ...entry,
+          amount: `${entry.amount}/dose`
+        };
+        
+        timingSchedule.morningWithFood.push(dividedEntry);
+        timingSchedule.eveningWithFood.push(dividedEntry);
+        
+        // Add to either pre or post workout depending on the supplement
+        if (['tudca', 'nac', 'r-lipoic-acid'].includes(supplement.id)) {
+          timingSchedule.preworkout.push(dividedEntry);
+        } else {
+          timingSchedule.postworkout.push(dividedEntry);
+        }
+      }
+    });
+    
+    // Add workout supplements to appropriate buckets
+    protocol.workoutSupplements.forEach(item => {
+      const supplement = item.supplement;
+      const dosage = item.dosage;
+      
+      const entry = {
+        name: supplement.name,
+        amount: `${dosage.amount}${dosage.unit}`,
+        notes: item.notes || ''
+      };
+      
+      if (dosage.timing === 'pre-workout') {
+        timingSchedule.preworkout.push(entry);
+      } else if (dosage.timing === 'post-workout') {
+        timingSchedule.postworkout.push(entry);
+      } else {
+        // Default to pre-workout if timing not specified
+        timingSchedule.preworkout.push(entry);
+      }
+    });
+    
+    return timingSchedule;
+  }
+  
+  /**
+   * Generate printable supplement plan for client
+   * @param {Object} protocol - The supplement protocol
+   * @returns {string} Formatted supplement plan
+   */
+  generatePrintablePlan(protocol) {
+    // Implementation would go here...
+    return "Printable supplement plan";
+  }
+}
+
+// Export for use in the app
+module.exports = {
+  SupplementProtocolManager,
+  SUPPLEMENTS_DATABASE,
+  SUPPLEMENT_STACKS,
+  SUPPLEMENT_CATEGORIES
+};
