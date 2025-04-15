@@ -1,0 +1,294 @@
+I've built a comprehensive coaching dashboard using React. Now, I want to expand it with advanced libraries of selectable data and programming templates across 5 key areas. These libraries should be modular, searchable, scalable, and allow for coach-driven customization.
+
+🧠 System Objective
+Enhance the dashboard with the following smart libraries and tools:
+
+1. Nutrition Tracking with Macro Calculations
+🥗 Food Database
+~5,000+ foods with:
+
+Name, brand (if applicable)
+
+Serving size (grams, cups, ounces, pieces)
+
+Macronutrients (P/C/F/Fiber)
+
+Micronutrients (Vitamins A–K, Ca, Mg, Zn, Fe, Na, K, etc.)
+
+Calories per serving
+
+Glycemic index
+
+Tags (vegan, keto, halal, etc.)
+
+USDA/FDC/Nutritionix integration (optional)
+
+🍱 Meal Templates
+Cutting, bulking, maintenance
+
+Carb cycling, keto, paleo, Mediterranean, IF
+
+Bodybuilding/contest prep phases (peak week, refeed, depletion)
+
+Time-restricted eating protocols
+
+🔧 Calculators
+BMR + TDEE (Mifflin/St. Jeor & Katch-McArdle options)
+
+Macro split calculators:
+
+Protein: 1.6–3.0 g/kg
+
+Fat: 0.5–1.5 g/kg
+
+Carbs: calculated by remainder or set
+
+Energy balance calculator (surplus/deficit %)
+
+Custom meal plan generator from macro targets
+
+⏱️ Nutrient Timing
+Pre/intra/post-workout splits
+
+Carb loading vs depletion strategies
+
+Nighttime recovery vs fasted training
+
+2. Training Program Management
+🏋️ Exercise Library
+500+ exercises categorized by:
+
+Primary/secondary muscle group
+
+Movement pattern (push/pull/hinge/squat/lunge)
+
+Equipment (barbell, DB, bands, TRX, cable, machines)
+
+Modality (strength, hypertrophy, endurance, mobility)
+
+Tags: compound, isolation, unilateral, rehab
+
+Video/GIF demo links
+
+📅 Training Splits
+Push/Pull/Legs
+
+Upper/Lower
+
+Body part splits (3–6 days)
+
+Full body, bro split, conjugate, DUP
+
+Specialized:
+
+CrossFit, powerlifting, Olympic lifting
+
+Athletic performance
+
+GVT, DC Training, FST-7
+
+Custom periodization planner
+
+📈 Programming Variables
+Intensity (1RM %, RIR/RPE scales)
+
+Volume (sets x reps tracking)
+
+Rest intervals
+
+Progressive overload strategies:
+
+Linear, step-loading, wave loading
+
+Daily Undulating Periodization (DUP)
+
+Reverse/auto-regulated progression
+
+🔄 Advanced Techniques
+Supersets, trisets, dropsets
+
+Rest-pause, myo-reps
+
+BFR, tempo control, cluster sets
+
+Neural charge sets
+
+Speed-strength blocks (Westside, Tier System)
+
+3. Health Markers & Vital Signs
+🧪 Bloodwork Markers
+CBC (RBC, WBC, hematocrit, MCV, etc.)
+
+Liver (ALT, AST, GGT, bilirubin)
+
+Kidney (creatinine, BUN, eGFR)
+
+Lipids (total, HDL, LDL, TG, ApoB)
+
+Glucose panel (fasting, A1c, insulin)
+
+Hormones:
+
+Testosterone (total/free), estradiol
+
+LH, FSH, SHBG, DHEA, progesterone
+
+Thyroid (TSH, T3, T4, rT3)
+
+Cortisol (AM/PM)
+
+Inflammatory: CRP, homocysteine, ESR
+
+Nutrients: D, B12, magnesium, ferritin, zinc, copper
+
+❤️ Vitals
+BP (auto-categorized: normal, stage 1, 2, hypertensive)
+
+RHR, HRV, O2 Sat
+
+Sleep metrics: total, REM/deep %, latency
+
+Respiratory rate
+
+Skin/body temp (useful for readiness/sickness)
+
+🩺 Assessment Tools
+VO2 max, resting HR
+
+HRV trend analysis
+
+Body comp (DEXA, skinfold, BIA)
+
+Strength tests (1RM est, isometric holds)
+
+Mobility/FMS screen
+
+Symptom journals: joint pain, mood, digestion, libido, cognition, anxiety
+
+4. PED Protocol Management
+💉 Compound Library
+Anabolics: Test (E/P/C), NPP/Deca, EQ, Dbol, Anadrol, Winstrol, Anavar, Tren, etc.
+
+Peptides: HGH 191aa, IGF-1 LR3, BPC-157, TB500, GHRPs, GHRHs
+
+SARMs: Ostarine, LGD-4033, RAD-140, S23, YK11
+
+Thyroid: T3 (liothyronine), T4 (levothyroxine)
+
+Insulin: Humalog, Lantus
+
+Fat Burners: Clenbuterol, Albuterol, Ephedrine, DNP
+
+AI/SERM: Anastrozole, Exemestane, Letrozole, Nolva, Clomid
+
+Others: Cardarine, SR9009, EPO, GW1516
+
+📦 Protocol Templates
+TRT / HRT templates
+
+Cutting: 8–20 week plans
+
+Bulking: classic, lean, or “blast-cruise”
+
+Contest prep
+
+Performance enhancement: sprint, strength, endurance
+
+Female-specific protocols (low-dose primos, anavar, etc.)
+
+🧪 Support + PCT
+Organ protection: TUDCA, NAC, hawthorn, baby aspirin
+
+PCT templates: Clomid, Nolva, HCG regimens
+
+Blood pressure stacks, lipid control
+
+Estrogen rebound mitigation
+
+🧮 Calculators
+Weight-based dosing (mg/kg)
+
+Front-load and taper charts
+
+Injection frequency generator
+
+Compound half-life chart + visualization
+
+5. Supplement Tracking
+💊 Supplement Library
+Protein, creatine, EAAs/BCAAs, pre-workouts
+
+Lipid health (berberine, fish oil, niacin)
+
+Liver (TUDCA, NAC, milk thistle)
+
+Kidney: astragalus, hawthorn
+
+Cognitive: Alpha-GPC, L-theanine, bacopa
+
+Sleep: melatonin, glycine, apigenin, magnesium threonate
+
+Digestive: probiotics, enzymes, betaine HCl
+
+Joint: collagen, glucosamine, MSM, Cissus
+
+Each with:
+
+Active ingredients + dosages
+
+Efficacy rating (e.g., Examine.com-based)
+
+Timing suggestions (pre/post/daily/night)
+
+Interaction warnings
+
+Cycling guidelines
+
+🧬 Supplement Stacks
+Muscle gain
+
+Fat loss
+
+Contest prep
+
+Health-focused
+
+Brain/CNS support
+
+Female/fertility stacks
+
+⚙️ Desired Implementation
+For each library, please assist with:
+
+📦 Schema Design
+
+JSON/DB structure to support filtering, versioning, user customization
+
+🎨 Frontend UI
+
+Component blueprints: searchable dropdowns, tag filtering, category tabs, card/grid views
+
+➕ Custom Entry Support
+
+Allow coaches to add their own foods, PEDs, exercises, etc.
+
+🔍 Smart Filtering
+
+Multi-tag filtering, search-as-you-type, sorting by categories or efficacy
+
+🔁 Dashboard Integration
+
+Realtime syncing to graphs, logs, protocols, or alerts (e.g., warning if client blood pressure is high while on tren + clen)
+
+📎 GitHub
+Project source: https://github.com/alaweimm/coaching-app-claude.git
+
+✅ Constraints
+Must scale for 1000+ entries per library
+
+Keep UI lightweight and mobile responsive
+
+Protect sensitive health/PED data (auth layer if needed)
+
+Allow JSON import/export for each library for version control
+
