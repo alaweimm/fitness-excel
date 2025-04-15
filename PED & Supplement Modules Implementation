@@ -1,0 +1,798 @@
+/**
+ * PED & SUPPLEMENTS IMPLEMENTATION
+ * ================================
+ * This implementation focuses on the PED and supplement tracking modules
+ * based on the data from the documents provided.
+ */
+
+// Database schema for PED management (based on content in draft-supps.pdf)
+const pedSchema = {
+  compounds: {
+    // AAS compounds (directly from document)
+    aas: {
+      testosterone: {
+        enanthate: {
+          id: 'test-e',
+          name: 'Testosterone Enanthate',
+          category: 'aas-androstane',
+          ester: 'enanthate',
+          halfLife: '4-5 days',
+          dosageRange: { min: 100, max: 500, unit: 'mg/week' },
+          estrogenConversion: 'high',
+          dhtConversion: 'high',
+          commonSideEffects: [
+            'Water retention',
+            'Gynecomastia',
+            'Acne',
+            'Hair loss',
+            'Testicular atrophy'
+          ],
+          counterMeasures: {
+            estrogenControl: ['Anastrozole', 'Exemestane'],
+            hairLoss: ['Finasteride'],
+            testAtrophy: ['HCG']
+          },
+          detectTime: '3 months',
+          notes: 'Primary testosterone compound for TRT and cycles'
+        },
+        cypionate: {
+          id: 'test-c',
+          name: 'Testosterone Cypionate',
+          category: 'aas-androstane',
+          ester: 'cypionate',
+          halfLife: '5-8 days',
+          dosageRange: { min: 100, max: 500, unit: 'mg/week' },
+          estrogenConversion: 'high',
+          dhtConversion: 'high',
+          commonSideEffects: [
+            'Water retention',
+            'Gynecomastia',
+            'Acne',
+            'Hair loss',
+            'Testicular atrophy'
+          ],
+          counterMeasures: {
+            estrogenControl: ['Anastrozole', 'Exemestane'],
+            hairLoss: ['Finasteride'],
+            testAtrophy: ['HCG']
+          },
+          detectTime: '3 months',
+          notes: 'Common in US for TRT prescriptions'
+        },
+        propionate: {
+          id: 'test-p',
+          name: 'Testosterone Propionate',
+          category: 'aas-androstane',
+          ester: 'propionate',
+          halfLife: '1-2 days',
+          dosageRange: { min: 150, max: 525, unit: 'mg/week', frequency: 'every other day' },
+          estrogenConversion: 'high',
+          dhtConversion: 'high',
+          commonSideEffects: [
+            'Water retention',
+            'Gynecomastia',
+            'Acne', 
+            'Hair loss',
+            'Testicular atrophy',
+            'More frequent injection pain'
+          ],
+          counterMeasures: {
+            estrogenControl: ['Anastrozole', 'Exemestane'],
+            hairLoss: ['Finasteride'],
+            testAtrophy: ['HCG']
+          },
+          detectTime: '2-3 weeks',
+          notes: 'Short-acting, requires frequent injections but clears system faster'
+        }
+      },
+      nandrolone: {
+        decanoate: {
+          id: 'deca',
+          name: 'Nandrolone Decanoate',
+          category: 'aas-19-nor',
+          ester: 'decanoate',
+          halfLife: '14-16 days',
+          dosageRange: { min: 200, max: 600, unit: 'mg/week' },
+          estrogenConversion: 'low',
+          dhtConversion: 'no (converts to DHN)',
+          progestogenic: 'yes',
+          commonSideEffects: [
+            'Water retention',
+            'Gynecomastia (progestin-mediated)',
+            'Erectile dysfunction ("deca dick")',
+            'Cardiovascular strain',
+            'Joint lubrication improvement'
+          ],
+          counterMeasures: {
+            prolactinControl: ['Cabergoline', 'Pramipexole'],
+            erectileDysfunction: ['Cabergoline', 'Cialis']
+          },
+          detectTime: '18 months',
+          notes: 'Known for joint benefits, long detection time'
+        },
+        phenylpropionate: {
+          id: 'npp',
+          name: 'Nandrolone Phenylpropionate',
+          category: 'aas-19-nor',
+          ester: 'phenylpropionate',
+          halfLife: '2-3 days',
+          dosageRange: { min: 150, max: 450, unit: 'mg/week', frequency: '3x/week' },
+          estrogenConversion: 'low',
+          dhtConversion: 'no (converts to DHN)',
+          progestogenic: 'yes',
+          commonSideEffects: [
+            'Water retention',
+            'Gynecomastia (progestin-mediated)',
+            'Erectile dysfunction',
+            'Cardiovascular strain',
+            'Joint lubrication improvement'
+          ],
+          counterMeasures: {
+            prolactinControl: ['Cabergoline', 'Pramipexole'],
+            erectileDysfunction: ['Cabergoline', 'Cialis']
+          },
+          detectTime: '12-18 months',
+          notes: 'Faster acting than Deca with similar benefits'
+        }
+      },
+      boldenone: {
+        undecylenate: {
+          id: 'eq',
+          name: 'Boldenone Undecylenate',
+          category: 'aas-derivative',
+          ester: 'undecylenate',
+          halfLife: '14 days',
+          dosageRange: { min: 200, max: 900, unit: 'mg/week' },
+          estrogenConversion: 'low',
+          commonSideEffects: [
+            'Increased appetite',
+            'Hematocrit elevation',
+            'Anxiety',
+            'Cardiovascular strain',
+            'Vascularity'
+          ],
+          counterMeasures: {
+            hematocrit: ['Blood donation', 'Stay hydrated'],
+            anxiety: ['Dose control']
+          },
+          detectTime: '5+ months',
+          notes: 'Often used for lean tissue gain with less water retention'
+        }
+      },
+      stanozolol: {
+        id: 'winstrol',
+        name: 'Stanozolol (Winstrol)',
+        category: 'aas-dht',
+        form: ['oral', 'injectable'],
+        halfLife: {
+          oral: '8-9 hours',
+          injectable: '24 hours' 
+        },
+        dosageRange: { 
+          oral: { min: 25, max: 100, unit: 'mg/day' },
+          injectable: { min: 25, max: 100, unit: 'mg/day' }
+        },
+        estrogenConversion: 'none',
+        dhtDerivative: 'yes',
+        commonSideEffects: [
+          'Joint pain',
+          'Liver stress (oral)',
+          'HDL suppression',
+          'Hair loss',
+          'Acne'
+        ],
+        counterMeasures: {
+          liverProtection: ['TUDCA', 'NAC'],
+          jointPain: ['Fish oil', 'Glucosamine']
+        },
+        detectTime: '2-3 months',
+        notes: 'Used for cutting cycles, increases strength and vascularity'
+      },
+      oxandrolone: {
+        id: 'anavar',
+        name: 'Oxandrolone (Anavar)',
+        category: 'aas-dht',
+        form: ['oral'],
+        halfLife: '9-10 hours',
+        dosageRange: { min: 20, max: 80, unit: 'mg/day' },
+        estrogenConversion: 'none',
+        dhtDerivative: 'yes',
+        commonSideEffects: [
+          'Liver stress (mild)',
+          'HDL suppression',
+          'Hair loss (mild)',
+          'Lipid changes'
+        ],
+        counterMeasures: {
+          liverProtection: ['NAC'],
+          lipids: ['Citrus Bergamot', 'Fish Oil']
+        },
+        detectTime: '3 weeks',
+        notes: 'Mild oral with low androgenic effects, popular with women'
+      },
+      mesterolone: {
+        id: 'proviron',
+        name: 'Mesterolone (Proviron)',
+        category: 'aas-dht',
+        form: ['oral'],
+        halfLife: '12-13 hours',
+        dosageRange: { min: 25, max: 150, unit: 'mg/day' },
+        estrogenConversion: 'none (acts as anti-estrogen)',
+        dhtDerivative: 'yes',
+        commonSideEffects: [
+          'Hair loss',
+          'Acne',
+          'Increased libido',
+          'Minimal hepatotoxicity'
+        ],
+        counterMeasures: {},
+        bioavailability: '3%',
+        proteinBinding: '98% (40% to Albumin, 58% to SHBG)',
+        detectTime: '5-6 weeks',
+        notes: 'Often used as an adjunct to free testosterone levels and improve estrogen balance'
+      }
+    },
+    
+    // Ancillaries and other compounds
+    ancillaries: {
+      ai: {
+        anastrozole: {
+          id: 'arimidex',
+          name: 'Anastrozole (Arimidex)',
+          category: 'aromatase-inhibitor',
+          form: ['oral'],
+          dosageRange: { min: 0.25, max: 1, unit: 'mg', frequency: '2-3x/week' },
+          halfLife: '46-48 hours',
+          mechanism: 'Non-suicidal aromatase inhibitor',
+          commonSideEffects: [
+            'Joint pain',
+            'Mood changes',
+            'Lipid profile changes',
+            'Low estrogen symptoms if overdosed'
+          ],
+          notes: 'Used to control estrogen on cycle, can rebound if stopped abruptly'
+        },
+        exemestane: {
+          id: 'aromasin',
+          name: 'Exemestane (Aromasin)',
+          category: 'aromatase-inhibitor',
+          form: ['oral'],
+          dosageRange: { min: 12.5, max: 25, unit: 'mg', frequency: 'every other day' },
+          halfLife: '24 hours',
+          mechanism: 'Suicidal aromatase inhibitor',
+          commonSideEffects: [
+            'Joint pain',
+            'Mood changes',
+            'Lipid profile changes',
+            'Low estrogen symptoms if overdosed'
+          ],
+          notes: 'Preferred AI for many, no rebound effect due to suicidal binding'
+        },
+        letrozole: {
+          id: 'femara',
+          name: 'Letrozole (Femara)',
+          category: 'aromatase-inhibitor',
+          form: ['oral'],
+          dosageRange: { min: 0.25, max: 2.5, unit: 'mg', frequency: '1-2x/week' },
+          halfLife: '48 hours',
+          mechanism: 'Potent non-suicidal aromatase inhibitor',
+          commonSideEffects: [
+            'Severe joint pain',
+            'Mood changes',
+            'Lipid profile changes',
+            'Low estrogen symptoms'
+          ],
+          notes: 'Very potent, usually reserved for gyno reduction or severe cases'
+        }
+      },
+      serms: {
+        tamoxifen: {
+          id: 'nolvadex',
+          name: 'Tamoxifen (Nolvadex)',
+          category: 'serm',
+          form: ['oral'],
+          dosageRange: { 
+            onCycle: { min: 10, max: 20, unit: 'mg/day' },
+            pct: { min: 20, max: 40, unit: 'mg/day' }
+          },
+          halfLife: '5-7 days',
+          mechanism: 'Selective estrogen receptor modulator (blocks breast tissue receptors)',
+          commonSideEffects: [
+            'Vision changes (rare)',
+            'Mood changes',
+            'Hot flashes'
+          ],
+          notes: 'Used for PCT and prevention/treatment of gynecomastia'
+        },
+        clomiphene: {
+          id: 'clomid',
+          name: 'Clomiphene (Clomid)',
+          category: 'serm',
+          form: ['oral'],
+          dosageRange: { 
+            pct: { min: 25, max: 50, unit: 'mg/day' }
+          },
+          halfLife: '5 days',
+          mechanism: 'Selective estrogen receptor modulator (stimulates LH/FSH)',
+          commonSideEffects: [
+            'Vision changes',
+            'Mood changes',
+            'Hot flashes',
+            'Emotional liability'
+          ],
+          notes: 'Used for PCT to restart natural testosterone production'
+        }
+      },
+      prolactin: {
+        cabergoline: {
+          id: 'dostinex',
+          name: 'Cabergoline (Dostinex)',
+          category: 'dopamine-agonist',
+          form: ['oral'],
+          dosageRange: { min: 0.25, max: 1, unit: 'mg', frequency: '1-2x/week' },
+          halfLife: '65-68 hours',
+          mechanism: 'Dopamine receptor (D2) agonist, reduces prolactin',
+          commonSideEffects: [
+            'Nausea',
+            'Headache',
+            'Dizziness',
+            'Heart valve issues (long-term high dose)'
+          ],
+          notes: 'Used for prolactin control with 19-nor steroids, can help libido issues'
+        },
+        pramipexole: {
+          id: 'mirapex',
+          name: 'Pramipexole (Mirapex)',
+          category: 'dopamine-agonist',
+          form: ['oral'],
+          dosageRange: { min: 0.1, max: 0.5, unit: 'mg/day' },
+          halfLife: '8-12 hours',
+          mechanism: 'Dopamine receptor (D2/D3) agonist, reduces prolactin',
+          commonSideEffects: [
+            'Nausea',
+            'Dizziness',
+            'Somnolence',
+            'Impulse control disorders'
+          ],
+          notes: 'Alternative to cabergoline, may have fewer cardiovascular concerns'
+        }
+      },
+      pct: {
+        hcg: {
+          id: 'hcg',
+          name: 'Human Chorionic Gonadotropin',
+          category: 'hormone',
+          form: ['injectable'],
+          dosageRange: { 
+            onCycle: { min: 250, max: 500, unit: 'IU', frequency: '2-3x/week' },
+            prePCT: { min: 1000, max: 2000, unit: 'IU', frequency: 'every other day', duration: '2 weeks' }
+          },
+          halfLife: '24-36 hours',
+          mechanism: 'LH mimetic, stimulates testicular function',
+          commonSideEffects: [
+            'Water retention',
+            'Gynecomastia (increases aromatization)',
+            'Testicular pain'
+          ],
+          notes: 'Used on-cycle or pre-PCT to prevent/reduce testicular atrophy'
+        }
+      },
+      health: {
+        telmisartan: {
+          id: 'micardis',
+          name: 'Telmisartan (Micardis)',
+          category: 'arb',
+          form: ['oral'],
+          dosageRange: { min: 20, max: 80, unit: 'mg/day' },
+          halfLife: '24 hours',
+          mechanism: 'Angiotensin II receptor blocker, supports blood pressure & kidney health',
+          commonSideEffects: [
+            'Dizziness',
+            'Back pain',
+            'Diarrhea'
+          ],
+          notes: 'Used for BP management on-cycle, has PPAR-delta agonist effects for metabolic benefits'
+        },
+        nebivolol: {
+          id: 'bystolic',
+          name: 'Nebivolol (Bystolic)',
+          category: 'beta-blocker',
+          form: ['oral'],
+          dosageRange: { min: 2.5, max: 10, unit: 'mg/day' },
+          halfLife: '10-12 hours',
+          mechanism: 'Selective beta-1 blocker with nitric oxide benefits',
+          commonSideEffects: [
+            'Fatigue',
+            'Dizziness',
+            'Low heart rate'
+          ],
+          notes: 'Used for BP management, minimal impact on exercise performance'
+        }
+      }
+    },
+    
+    // SARMS data
+    sarms: {
+      lgd4033: {
+        id: 'ligandrol',
+        name: 'LGD-4033 (Ligandrol)',
+        category: 'sarm',
+        form: ['oral'],
+        dosageRange: { min: 4, max: 10, unit: 'mg/day' },
+        halfLife: '30 hours',
+        commonSideEffects: [
+          'Testosterone suppression',
+          'Elevated liver enzymes',
+          'Minimal androgenic sides'
+        ],
+        notes: 'Increases pumps and reduces fatigue'
+      },
+      rad140: {
+        id: 'testolone',
+        name: 'RAD-140 (Testolone)',
+        category: 'sarm',
+        form: ['oral'],
+        dosageRange: { min: 10, max: 20, unit: 'mg/day' },
+        halfLife: '16-20 hours',
+        commonSideEffects: [
+          'Testosterone suppression',
+          'Hair shedding possible',
+          'Elevated liver enzymes'
+        ],
+        notes: 'Muscle growth and strength, may have nootropic effects'
+      },
+      mk2866: {
+        id: 'ostarine',
+        name: 'MK-2866 (Ostarine, Enobosarm)',
+        category: 'sarm',
+        form: ['oral'],
+        dosageRange: { min: 10, max: 25, unit: 'mg/day' },
+        halfLife: '24 hours',
+        commonSideEffects: [
+          'Mild testosterone suppression',
+          'Minimal side effects'
+        ],
+        notes: 'Mildest SARM, often used for cutting cycles'
+      },
+      gw501516: {
+        id: 'cardarine',
+        name: 'GW501516 (Cardarine)',
+        category: 'ppar-agonist',
+        form: ['oral'],
+        dosageRange: { min: 7, max: 20, unit: 'mg/day' },
+        halfLife: '16-24 hours',
+        commonSideEffects: [
+          'Few reported side effects',
+          'Potential cancer concerns from research'
+        ],
+        notes: 'Increases endurance and fat loss, not technically a SARM'
+      },
+      mk677: {
+        id: 'ibutamoren',
+        name: 'MK-677 (Ibutamoren)',
+        category: 'growth-hormone-secretagogue',
+        form: ['oral'],
+        dosageRange: { min: 10, max: 25, unit: 'mg/day' },
+        halfLife: '24 hours',
+        commonSideEffects: [
+          'Increased appetite',
+          'Water retention',
+          'Elevated blood glucose',
+          'Lethargy'
+        ],
+        notes: 'Increases GH and IGF-1 levels, not technically a SARM'
+      }
+    },
+    
+    // Peptides
+    peptides: {
+      hgh: {
+        id: 'somatropin',
+        name: 'Human Growth Hormone (Somatropin)',
+        category: 'peptide-hormone',
+        form: ['injectable'],
+        dosageRange: { 
+          antiAging: { min: 1, max: 3, unit: 'IU/day' },
+          bodybuilding: { min: 2, max: 6, unit: 'IU/day' },
+          timing: ['post-workout', 'pre-bed', 'morning']
+        },
+        halfLife: '3-5 hours',
+        commonSideEffects: [
+          'Water retention',
+          'Joint pain',
+          'Carpal tunnel',
+          'Insulin resistance',
+          'Potential heart growth'
+        ],
+        notes: 'Used for recovery, fat loss, and anti-aging effects'
+      },
+      bpc157: {
+        id: 'bpc157',
+        name: 'BPC-157',
+        category: 'healing-peptide',
+        form: ['injectable', 'oral'],
+        dosageRange: { min: 250, max: 500, unit: 'mcg', frequency: '1-2x/day' },
+        halfLife: '4 hours',
+        commonSideEffects: [
+          'Few reported side effects'
+        ],
+        notes: 'Used for injury healing and gut health'
+      },
+      tb500: {
+        id: 'tb500',
+        name: 'TB-500 (Thymosin Beta-4)',
+        category: 'healing-peptide',
+        form: ['injectable'],
+        dosageRange: { min: 2, max: 5, unit: 'mg', frequency: '2x/week' },
+        halfLife: 'Unknown',
+        commonSideEffects: [
+          'Few reported side effects',
+          'Potential flu-like symptoms initially'
+        ],
+        notes: 'Used for injury healing, often combined with BPC-157'
+      },
+      frag176191: {
+        id: 'frag',
+        name: 'Fragment 176-191',
+        category: 'gh-fragment',
+        form: ['injectable'],
+        dosageRange: { min: 250, max: 500, unit: 'mcg', frequency: '1-2x/day' },
+        halfLife: '30 minutes',
+        commonSideEffects: [
+          'Few reported side effects'
+        ],
+        notes: 'Used for fat loss, the "fat burning" fragment of GH'
+      },
+      pt141: {
+        id: 'bremelanotide',
+        name: 'PT-141 (Bremelanotide)',
+        category: 'sexual-function',
+        form: ['injectable', 'nasal spray'],
+        dosageRange: { min: 1, max: 3, unit: 'mg', timing: '4-6 hours before activity' },
+        halfLife: '2 hours',
+        commonSideEffects: [
+          'Nausea',
+          'Flushing',
+          'Headache'
+        ],
+        notes: 'Used for sexual dysfunction in both men and women'
+      }
+    },
+    
+    // Thyroid medications
+    thyroid: {
+      t3: {
+        id: 'liothyronine',
+        name: 'T3 (Liothyronine, Cytomel)',
+        category: 'thyroid-hormone',
+        form: ['oral'],
+        dosageRange: { min: 25, max: 75, unit: 'mcg/day' },
+        halfLife: '2.5 days',
+        commonSideEffects: [
+          'Increased heart rate',
+          'Anxiety',
+          'Insomnia',
+          'Muscle catabolism at higher doses',
+          'Suppression of natural thyroid function'
+        ],
+        notes: 'Used for fat loss, must be tapered'
+      },
+      t4: {
+        id: 'levothyroxine',
+        name: 'T4 (Levothyroxine, Synthroid)',
+        category: 'thyroid-hormone',
+        form: ['oral'],
+        dosageRange: { min: 100, max: 200, unit: 'mcg/day' },
+        halfLife: '7 days',
+        commonSideEffects: [
+          'Milder than T3',
+          'Potential suppression of natural thyroid'
+        ],
+        notes: 'Less potent than T3, body converts to T3'
+      }
+    }
+  }
+};
+
+// PED Protocol Management Component
+// This component will handle the creation and management of PED protocols
+class PEDProtocolManager {
+  constructor() {
+    this.compoundDatabase = pedSchema.compounds;
+    this.protocolTemplates = {
+      trt: {
+        name: 'TRT (Testosterone Replacement Therapy)',
+        description: 'Basic hormone replacement protocol',
+        compounds: [
+          {
+            compound: 'test-e',
+            dose: 150,
+            frequency: 'weekly'
+          }
+        ],
+        duration: 'ongoing',
+        supportSupplements: [
+          'Vitamin D3',
+          'Zinc',
+          'Magnesium'
+        ],
+        bloodworkFrequency: '3 months'
+      },
+      mildCycle: {
+        name: 'Mild Enhancement Cycle',
+        description: 'Entry level performance enhancement',
+        compounds: [
+          {
+            compound: 'test-e',
+            dose: 300,
+            frequency: 'weekly'
+          }
+        ],
+        ancillaries: [
+          {
+            compound: 'aromasin',
+            dose: 12.5,
+            frequency: 'twice weekly'
+          }
+        ],
+        duration: '12 weeks',
+        pct: {
+          timing: 'start 2 weeks after last injection',
+          compounds: [
+            {
+              compound: 'nolvadex',
+              dose: [40, 40, 20, 20],
+              notes: '40mg daily for 2 weeks, then 20mg daily for 2 weeks'
+            },
+            {
+              compound: 'clomid',
+              dose: [50, 50, 25, 25],
+              notes: '50mg daily for 2 weeks, then 25mg daily for 2 weeks'
+            }
+          ]
+        },
+        supportSupplements: [
+          'NAC',
+          'Fish Oil',
+          'Vitamin D3',
+          'Telmisartan if BP elevation'
+        ],
+        bloodworkFrequency: 'Pre-cycle, Mid-cycle, Post-PCT'
+      },
+      intermediateCycle: {
+        name: 'Intermediate Mass Cycle',
+        description: 'Mass building cycle for experienced users',
+        compounds: [
+          {
+            compound: 'test-e',
+            dose: 500,
+            frequency: 'weekly'
+          },
+          {
+            compound: 'deca',
+            dose: 300,
+            frequency: 'weekly'
+          }
+        ],
+        ancillaries: [
+          {
+            compound: 'aromasin',
+            dose: 12.5,
+            frequency: 'every other day'
+          },
+          {
+            compound: 'dostinex',
+            dose: 0.25,
+            frequency: 'twice weekly'
+          }
+        ],
+        duration: '16 weeks',
+        pct: {
+          timing: 'start 3 weeks after last injection',
+          compounds: [
+            {
+              compound: 'hcg',
+              dose: 1000,
+              frequency: 'every other day',
+              duration: '2 weeks'
+            },
+            {
+              compound: 'nolvadex',
+              dose: [40, 40, 20, 20],
+              notes: '40mg daily for 2 weeks, then 20mg daily for 2 weeks'
+            },
+            {
+              compound: 'clomid',
+              dose: [50, 50, 25, 25],
+              notes: '50mg daily for 2 weeks, then 25mg daily for 2 weeks'
+            }
+          ]
+        },
+        supportSupplements: [
+          'TUDCA',
+          'NAC',
+          'Fish Oil',
+          'Citrus Bergamot',
+          'CoQ10',
+          'Telmisartan'
+        ],
+        healthMonitoring: {
+          bloodPressure: 'Daily',
+          bloodwork: 'Pre-cycle, Week 8, Post-PCT',
+          other: 'Regular donation if hematocrit elevates'
+        }
+      },
+      cuttingCycle: {
+        name: 'Cutting/Contest Prep Cycle',
+        description: 'For preserving muscle during fat loss phases',
+        compounds: [
+          {
+            compound: 'test-e',
+            dose: 250,
+            frequency: 'weekly'
+          },
+          {
+            compound: 'winstrol',
+            dose: 50,
+            frequency: 'daily',
+            duration: 'last 6 weeks'
+          }
+        ],
+        ancillaries: [
+          {
+            compound: 'aromasin',
+            dose: 12.5,
+            frequency: 'twice weekly'
+          }
+        ],
+        fatBurners: [
+          {
+            compound: 'clenbuterol',
+            dose: '20mcg titrating up to 80mcg',
+            protocol: '2 weeks on/2 weeks off'
+          }
+        ],
+        duration: '12 weeks',
+        supportSupplements: [
+          'TUDCA',
+          'NAC',
+          'Fish Oil',
+          'Taurine (for pumps/cramps)',
+          'Joint supplements'
+        ]
+      }
+    };
+  }
+
+  // Create a new protocol for a client based on experience, goals and health factors
+  createProtocol(clientData, protocolType, customizations = {}) {
+    // Start with a template
+    const baseProtocol = JSON.parse(JSON.stringify(this.protocolTemplates[protocolType]));
+    
+    // Apply customizations based on client data
+    if (clientData.weight) {
+      // Adjust dosages based on weight if needed
+      baseProtocol.compounds.forEach(compound => {
+        if (customizations.dosePerKg) {
+          compound.dose = Math.round(clientData.weight * customizations.dosePerKg);
+        }
+      });
+    }
+    
+    // Add health-specific modifications
+    if (clientData.healthIssues) {
+      if (clientData.healthIssues.includes('highBloodPressure')) {
+        // Add BP management
+        baseProtocol.ancillaries.push({
+          compound: 'telmisartan',
+          dose: 40,
+          frequency: 'daily'
+        });
+      }
+      
+      if (clientData.healthIssues.includes('hairLoss')) {
+        // Add hair loss protection for DHT derivatives
+        const hasDHTCompounds = baseProtocol.compounds.some(c => 
+          this.compoundDatabase.aas[c.compound] && 
+          this.compoundDatabase.aas[c.compound].dhtDerivative
+        );
